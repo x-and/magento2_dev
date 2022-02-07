@@ -6,13 +6,12 @@ RUN apt-get install -y tzdata software-properties-common
 RUN cp /usr/share/zoneinfo/Europe/Simferopol /etc/localtime && echo "Europe/Simferopol" > /etc/timezone
 
 VOLUME /var/www/html/magento2
-VOLUME /var/lib/mysql
 
-# php mariadb nginx cron
+# php nginx cron
 RUN apt-get install -y \
 	php7.4 \
+	mariadb-client \
 	php7.4-fpm \
-	mariadb-server \
 	php-bcmath \
 	php-curl \
 	php-dom \
@@ -37,15 +36,8 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 	php -r "unlink('composer-setup.php');" && \
 	mv composer.phar /usr/local/bin/composer
 
-# elasticsearch
-RUN curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add - && \
-	echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list && \
-	apt-get update && \
-	apt-get install -y elasticsearch
-
 ADD entrypoint.sh /root
 ADD db_init.sql /root
-
 ADD nginx.conf /etc/nginx/nginx.conf
 
 ENTRYPOINT ["/root/entrypoint.sh"]
